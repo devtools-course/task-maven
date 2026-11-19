@@ -1,0 +1,161 @@
+= Task Maven
+
+> Fenrir ID: `maven` +
+> Branch: `maven` +
+> Points: `90`
+
+== Task submission
+
+Put all the files in the `maven` directory:
+
+[,text,subs="+macros"]
+----
+icon:folder[] ...
+├─ icon:folder[] maven
+│  ├─ icon:folder[] javadoc
+│  │  ├─ ...
+│  │  ├─ icon:file-code[] repo.xml
+│  │  └─ icon:file-code[] pom.xml
+│  ├─ icon:folder[] meeting
+│  │  ├─ ...
+│  │  └─ icon:file-code[] pom.xml
+│  ├─ icon:folder[] profiles
+│  │  ├─ ...
+│  │  └─ icon:file-code[] pom.xml
+│  ├─ icon:folder[] server
+│  │  ├─ ...
+│  │  └─ icon:file-code[] pom.xml
+│  └─ icon:folder[] simple
+│     ├─ ...
+│     └─ icon:file-code[] pom.xml
+└─ icon:folder[] .git
+----
+
+IMPORTANT: All sources use java 25. The resulting bytecode must target java 25 too.
+
+== Simple app (10 points)
+
+Subdirectory: `simple`
+
+You are provided with two files: `Main.java` and `Deps.java`:
+
+[,text,subs="+macros"]
+----
+icon:folder[] ...
+├─ icon:folder[] simple
+│  └─ icon:file-text[] Deps.java
+└─ icon:file-text[] Main.java
+----
+
+Transform them into a maven project. Its coordinates are:
+
+* `artifactID`: `simple`
+* `groupID`: `com.github.devtoolscourse`
+* `version`: `0.1-SNAPSHOT`
+
+The generated jar must have `Main` class as the entrypoint and its name must be `simple.jar`.
+
+== Version conflict (20 points)
+
+Subdirectory: `meeting`
+
+The project uses dependencies from the Maven repository of the `https://gitlab.com/lBAH/dt-mvn-repo` GitLab project.
+However, when trying to compile the project, the build fails due to the incompatible versions of the dependencies. Update the `pom.xml` so that the project builds successfully.
+
+TIP: See the dependency tree (use `maven-dependency-plugin`) and download the dependencies. Use JDK tools to study the dependencies.
+
+TIP: If you're using IntelliJ IDEA, you can study the dependencies in the `Project` window (where fs tree is shown). Expand `External Libraries` section and you'll see `Maven:...`.
+
+== Dependency duplication (20 points)
+
+Subdirectory: `server`
+
+This time you have to work with a modularised project. It consists of three modules: `core`, `server-a` and `server-b`. Both servers depend on the `core` module. Create `pom.xml` files to build the project.
+
+Maven will be invoked with `mvn package -Dinstall.prefix=_DIR_` from the `server` directory. After the project is built, the created jars must be placed into the `${install.prefix}` directory: servers into `services` subdirectory, their dependencies into `deps` subdirectory.
+
+CAUTION: You must avoid duplicating the shared dependencies. Do not use fat jars!
+
+[,text,subs="+macros"]
+----
+icon:folder[] ${install.prefix}
+├─ icon:folder[] services
+│  ├─ icon:file-archive[] server-a-1.0.0.jar
+│  └─ icon:file-archive[] server-b-1.0.0.jar
+└─ icon:folder[] deps
+   └─ ...
+----
+
+== Profiles (20 points)
+
+Subdirectory: `profiles`
+
+Create a multi-module maven project. Module `core` depends on `provider` which has two implementations: `dev` and `prod`. The implementation is defined by the chosen profile: either `dev` or `prod`. The `dev` profile is the default one.
+
+Moreover, the project uses `properties` files:
+
+[,properties]
+----
+db.url = db://${credentials.username}:${credentials.password}/db
+----
+
+When `dev` is selected, you must pass `user` and `pass`. When `prod` is selected, the credentials are passed as environment variables: `USERNAME` and `PASSWORD`.
+
+The core module must be compiled into a fat jar.
+
+== Plugin (20 points)
+
+Subdirectory: `javadoc`
+
+You have to implement the `maven-javadoc-plugin` plugin. It must generate a site with doc pages for the project (recall the `javadoc` command). The plugin must provide a goal `javadoc` which is executed on the `process-sources` phase.
+
+.Plugin declaration
+[,xml]
+----
+<plugin>
+    <groupId>com.github.devtoolscourse</groupId>
+    <artifactId>javadoc-plugin</artifactId>
+    <version>0.1.0</version>
+    <executions>
+        <execution>
+            <goals>
+                <goal>javadoc</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+----
+
+Deploy the plugin to the GitLab Maven Repository of your project. Create a `repo.xml` file, which contains the code that allows to use your plugin.
+
+CAUTION: Use `gl-repo` id. The credentials are automatically passed during the tests in GitLab.
+
+[,xml]
+----
+<project>
+<!-- ... -->
+HERE repo.xml IS INJECTED
+<!-- ... -->
+</project>
+----
+
+TIP: Use `Files` utility class to work with the FS through Java code.
+
+== Questions
+* What is the difference between a fat and a slim jars?
+* How to generate Javadoc for the project?
+* Which version is chosen when multiple versions are present in the dependencies tree?
+* How to access an environment variable in `pom.xml`?
+* How to declare additional repositories for the dependencies/plugins?
+* What is the difference between plugins and dependencies?
+
+== Copyright
+
+pass:[<i class="fab fa-creative-commons"></i>]
+pass:[<i class="fab fa-creative-commons-by"></i>]
+pass:[<i class="fab fa-creative-commons-nc"></i>]
+pass:[<i class="fab fa-creative-commons-sa"></i>]
+
+The project is licensed under the terms of the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+
+(C) 2026-present *Iwan Kalinin* <mailto:koefic.cien@gmail.com[koefic.cien@gmail.com]>
